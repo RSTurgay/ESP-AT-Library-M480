@@ -26,19 +26,25 @@
 #include "timers.h"
 #include "semphr.h"
 
+/* LwESP Library Includes*/
+#include "lwesp/lwesp.h"
+
 /* Application Definitions */
 
 
 /* FreeRTOS Definitions */
 #define mainCHECK_TASK_PRIORITY				(tskIDLE_PRIORITY + 3UL)
+#define mainWIFI_TASK_PRIORITY				(tskIDLE_PRIORITY + 3UL)
 
 #define mainCHECK_TASK_STACK_SIZE			(configMINIMAL_STACK_SIZE)
+#define mainWIFI_TASK_STACK_SIZE			(512)
 
 /* Hardware Definitions */
 
 /* FreeRTOS Functions*/
 
 void vCheckTask(void *pvParameters);
+void vWifiTask(void *pvParameters);
 
 /* Application Functions*/
 

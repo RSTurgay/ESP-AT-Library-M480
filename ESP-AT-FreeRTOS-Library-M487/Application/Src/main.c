@@ -27,6 +27,9 @@ int main(void) {
 	printf("Check Task is creating ...\n");
 	xTaskCreate(vCheckTask, "Check Task",  mainCHECK_TASK_STACK_SIZE, NULL, mainCHECK_TASK_PRIORITY, NULL);
 	
+	printf("Wifi Task is creating ...\n");
+	xTaskCreate(vCheckTask, "Wifi Task",  mainWIFI_TASK_STACK_SIZE, NULL, mainWIFI_TASK_PRIORITY, NULL);
+	
 	printf("FreeRTOS is starting ...\n");
 	
 	/* Start the scheduler. */
@@ -57,6 +60,21 @@ void vCheckTask(void *pvParameters) {
 		printf("App running time : %d \n", xTaskGetTickCount());
 		vTaskDelay(1000);
 		
+	}
+	
+}
+
+void vWifiTask(void *pvParameters) {
+	
+	/* Task Setup */
+	
+	printf("Wifi Task is started ...\n");
+	
+	/* Task Loop */
+	
+	for (;;) {
+		
+
 	}
 	
 }
@@ -99,7 +117,6 @@ void setupSystemClock(void)
 	/* Set both PCLK0 and PCLK1 as HCLK/2 */
   CLK->PCLKDIV = CLK_PCLKDIV_APB0DIV_DIV2 | CLK_PCLKDIV_APB1DIV_DIV2;
 	CLK->PCLKDIV = CLK_PCLKDIV_PCLK0DIV2 | CLK_PCLKDIV_PCLK1DIV2;
-
 
 	setupUartClock();
 	
