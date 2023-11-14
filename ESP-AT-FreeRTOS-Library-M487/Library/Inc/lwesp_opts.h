@@ -1,5 +1,5 @@
 /**
- * \file            lwesp_opts_template.h
+ * \file            lwesp_opts.h
  * \brief           Template config file
  */
 
@@ -597,7 +597,7 @@
  * \note            Best case for using this mode is if DMA receive is supported by host device
  */
 #ifndef LWESP_CFG_INPUT_USE_PROCESS
-#define LWESP_CFG_INPUT_USE_PROCESS 0
+#define LWESP_CFG_INPUT_USE_PROCESS 1
 #endif
 
 /**

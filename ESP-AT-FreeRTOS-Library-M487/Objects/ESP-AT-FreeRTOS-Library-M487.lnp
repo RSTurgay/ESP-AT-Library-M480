@@ -42,8 +42,6 @@
 ".\objects\lwesp_mqtt_client.o"
 ".\objects\lwesp_mqtt_client_api.o"
 ".\objects\lwesp_mqtt_client_evt.o"
-".\objects\lwesp_http_server.o"
-".\objects\lwesp_http_server_fs.o"
 ".\objects\retarget.o"
 ".\objects\startup_m480.o"
 ".\objects\system_m480.o"

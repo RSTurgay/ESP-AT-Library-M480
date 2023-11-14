@@ -3,10 +3,115 @@
 // Author: Turgay Hopal
 // Date: 11.08.2023
 
-
 #include "main.h"
 
 /* IRQ Handler Functions*/
+
+
+/* Callback Functions */
+
+static lwespr_t lwesp_callback_func(lwesp_evt_t *evt) {
+	    
+	switch (lwesp_evt_get_type(evt)) {
+		case LWESP_EVT_AT_VERSION_NOT_SUPPORTED:
+			printf("Current ESP8266 AT version is not supported by library!\r\n");
+			break;
+
+		case LWESP_EVT_INIT_FINISH:
+			printf("Library initialized!\r\n");
+			break;
+
+		case LWESP_EVT_RESET:
+			printf("Device reset sequence finished!\r\n");
+			break;
+
+		case LWESP_EVT_RESET_DETECTED:
+			printf("Device reset detected!\r\n");
+			break;
+
+		case LWESP_EVT_WIFI_IP_ACQUIRED:
+				break;
+		default:
+				break;
+    }
+}
+
+/**
+ * \brief           Lookup table for preferred SSIDs with password for auto connect feature
+ */
+typedef struct
+{
+    const char *ssid;
+    const char *pass;
+} ap_entry_t;
+
+
+ap_entry_t ap_list[] =
+{
+    //{ "SSID name", "SSID password" },
+		{"STRT", "STRT5481**tr!" },
+};
+
+/**
+ * \brief           List of access points found by ESP device
+ */
+static lwesp_ap_t aps[100];
+
+/**
+ * \brief           Number of valid access points in \ref aps array
+ */
+static size_t apf;
+
+lwespr_t connect_to_preferred_access_point(uint8_t unlimited) {
+	lwespr_t eres;
+	uint8_t tried;
+
+	/*
+	 * Scan for network access points
+	 * In case we have access point,
+	 * try to connect to known AP
+	 */
+	do
+	{
+			if (lwesp_sta_has_ip())
+			{
+					return lwespOK;
+			}
+
+			/* Scan for access points visible to ESP device */
+			printf("Scanning access points...\r\n");
+
+			if ((eres = lwesp_sta_list_ap(NULL, aps, LWESP_ARRAYSIZE(aps), &apf, NULL, NULL, 1)) == lwespOK)
+			{
+				tried = 0;
+
+				/* Print all access points found by ESP */
+				for (size_t i = 0; i < apf; i++)
+				{
+						printf("AP found: %s, CH: %d, RSSI: %d\r\n", aps[i].ssid, aps[i].ch, aps[i].rssi);
+				}
+
+			}
+			else if (eres == lwespERRNODEVICE)
+			{
+					printf("Device is not present!\r\n");
+					break;
+			}
+			else
+			{
+					printf("Error on WIFI scan procedure!\r\n");
+			}
+
+			if (!unlimited)
+			{
+					break;
+			}
+    } while (1);
+
+    return lwespOK;
+}
+
+
 
 /* Main Application*/
 
@@ -28,7 +133,7 @@ int main(void) {
 	xTaskCreate(vCheckTask, "Check Task",  mainCHECK_TASK_STACK_SIZE, NULL, mainCHECK_TASK_PRIORITY, NULL);
 	
 	printf("Wifi Task is creating ...\n");
-	xTaskCreate(vCheckTask, "Wifi Task",  mainWIFI_TASK_STACK_SIZE, NULL, mainWIFI_TASK_PRIORITY, NULL);
+	xTaskCreate(vWifiTask, "Wifi Task",  mainWIFI_TASK_STACK_SIZE, NULL, mainWIFI_TASK_PRIORITY, NULL);
 	
 	printf("FreeRTOS is starting ...\n");
 	
@@ -57,9 +162,6 @@ void vCheckTask(void *pvParameters) {
 	
 	for (;;) {
 		
-		printf("App running time : %d \n", xTaskGetTickCount());
-		vTaskDelay(1000);
-		
 	}
 	
 }
@@ -70,14 +172,40 @@ void vWifiTask(void *pvParameters) {
 	
 	printf("Wifi Task is started ...\n");
 	
+	printf("Initializing ESP-AT Lib\r\n");
+
+	vTaskDelay(100);
+	
+	if (lwesp_init(lwesp_callback_func, 1) != lwespOK)
+	{
+			printf("Cannot initialize ESP-AT Lib!\r\n");
+	}
+	else
+	{
+			printf("ESP-AT Lib initialized!\r\n");
+	}
+	
 	/* Task Loop */
 	
 	for (;;) {
 		
+		if (!lwesp_sta_is_joined())
+		{
+				/*
+				 * Connect to access point.
+				 *
+				 * Try unlimited time until access point accepts up.
+				 * Check for station_manager.c to define preferred access points ESP should connect to
+				 */
+				connect_to_preferred_access_point(1);
+		}
 
+		vTaskDelay(1000);
+		
 	}
 	
 }
+
 
 
 /* Application Function Implemantation*/
